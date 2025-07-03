@@ -3,7 +3,15 @@ import dj_database_url
 
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
+# Render.com automatically sets RENDER env var
+ALLOWED_HOSTS = []
+if 'RENDER' in os.environ:
+    ALLOWED_HOSTS.append(os.environ.get('RENDER_EXTERNAL_HOSTNAME'))
+else:
+    # Fallback for other hosting providers
+    allowed_hosts_str = os.environ.get('ALLOWED_HOSTS', '')
+    if allowed_hosts_str:
+        ALLOWED_HOSTS = allowed_hosts_str.split(',')
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
 if not SECRET_KEY:

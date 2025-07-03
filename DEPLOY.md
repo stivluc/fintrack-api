@@ -33,9 +33,10 @@ git push origin main
 DJANGO_SETTINGS_MODULE=fintrack.settings.production
 SECRET_KEY=your-new-secret-key-here-generate-one
 DATABASE_URL=postgresql://postgres:YOUR_SUPABASE_PASSWORD@db.jawqtsmaakoleszqyoeb.supabase.co:5432/postgres
-ALLOWED_HOSTS=your-app.onrender.com
 DEBUG=False
 ```
+
+> ⚠️ **Note** : `ALLOWED_HOSTS` n'est pas nécessaire sur Render, il est géré automatiquement
 
 ### 3. Après déploiement
 
@@ -83,6 +84,26 @@ GET  /api/accounts/                 # Comptes
 GET  /api/budgets/                  # Budgets
 GET  /api/budgets/alerts/           # Alertes budget
 ```
+
+## 🔧 Dépannage des erreurs courantes
+
+### Erreur `No module named 'pkg_resources'`
+**Solution** : Ajouté `setuptools==75.8.0` dans requirements.txt
+
+### Erreur de build Django
+**Solution** : Script build.sh amélioré avec gestion d'erreurs
+
+### Erreur de connexion base de données
+**Vérifier** : 
+- Variable `DATABASE_URL` correctement configurée
+- Mot de passe Supabase correct
+- Connexions autorisées dans Supabase
+
+### Variables d'environnement manquantes
+**Vérifier** :
+- `SECRET_KEY` généré
+- `DJANGO_SETTINGS_MODULE=fintrack.settings.production`
+- `DATABASE_URL` avec vraies credentials
 
 ## Surveillance
 
