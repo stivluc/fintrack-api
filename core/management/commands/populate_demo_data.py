@@ -1,8 +1,9 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
-from core.models import Category, Account, CategoryType, AccountType
+from django.db.models import Sum
+from core.models import Category, Account, CategoryType, AccountType, Asset, AssetType
 from transactions.models import Transaction, Budget, BudgetPeriod
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from decimal import Decimal
 import random
 
@@ -214,15 +215,103 @@ class Command(BaseCommand):
         
         self.stdout.write(self.style.SUCCESS(f'✓ {budgets_created} budgets created'))
         
-        # 7. Statistiques finales
+        # 7. Créer des assets pour le patrimoine
+        assets_data = [
+            {
+                'name': 'Appartement Paris 15ème',
+                'asset_type': AssetType.REAL_ESTATE,
+                'current_value': 285000.00,
+                'purchase_price': 250000.00,
+                'purchase_date': date(2020, 3, 15),
+                'description': 'Appartement 3 pièces de 65m² dans le 15ème arrondissement'
+            },
+            {
+                'name': 'Actions Total Energies',
+                'asset_type': AssetType.STOCKS,
+                'current_value': 12500.00,
+                'purchase_price': 10800.00,
+                'purchase_date': date(2021, 6, 10),
+                'description': '250 actions Total Energies'
+            },
+            {
+                'name': 'Assurance Vie Crédit Agricole',
+                'asset_type': AssetType.INSURANCE,
+                'current_value': 18500.00,
+                'purchase_price': 15000.00,
+                'purchase_date': date(2019, 1, 20),
+                'description': 'Contrat d\'assurance vie multi-supports'
+            },
+            {
+                'name': 'Livret A',
+                'asset_type': AssetType.SAVINGS_ACCOUNT,
+                'current_value': 22300.00,
+                'purchase_price': 20000.00,
+                'purchase_date': date(2018, 9, 5),
+                'description': 'Livret A plafonné'
+            },
+            {
+                'name': 'PEL Banque Populaire',
+                'asset_type': AssetType.PENSION_PLAN,
+                'current_value': 18000.00,
+                'purchase_price': 16500.00,
+                'purchase_date': date(2019, 5, 12),
+                'description': 'Plan Épargne Logement'
+            },
+            {
+                'name': 'Portefeuille Crypto',
+                'asset_type': AssetType.CRYPTO,
+                'current_value': 8500.00,
+                'purchase_price': 12000.00,
+                'purchase_date': date(2021, 11, 28),
+                'description': 'Bitcoin, Ethereum et autres altcoins'
+            },
+            {
+                'name': 'Or physique',
+                'asset_type': AssetType.PRECIOUS_METALS,
+                'current_value': 3500.00,
+                'purchase_price': 3200.00,
+                'purchase_date': date(2020, 8, 14),
+                'description': 'Pièces et lingots d\'or'
+            },
+            {
+                'name': 'SCPI Immobilière',
+                'asset_type': AssetType.REAL_ESTATE,
+                'current_value': 15000.00,
+                'purchase_price': 14500.00,
+                'purchase_date': date(2022, 2, 18),
+                'description': 'Parts de SCPI de rendement'
+            }
+        ]
+        
+        assets_created = 0
+        for asset_data in assets_data:
+            Asset.objects.get_or_create(
+                name=asset_data['name'],
+                user=demo_user,
+                defaults=asset_data
+            )
+            assets_created += 1
+        
+        self.stdout.write(self.style.SUCCESS(f'✓ {assets_created} assets created'))
+        
+        # 8. Statistiques finales
         total_transactions = Transaction.objects.filter(user=demo_user).count()
         total_accounts = Account.objects.filter(user=demo_user).count()
         total_budgets = Budget.objects.filter(user=demo_user).count()
+        total_assets = Asset.objects.filter(user=demo_user).count()
+        total_wealth = (
+            Account.objects.filter(user=demo_user).aggregate(total=Sum('balance'))['total'] or 0
+        ) + (
+            Asset.objects.filter(user=demo_user).aggregate(total=Sum('current_value'))['total'] or 0
+        )
         
         self.stdout.write(self.style.SUCCESS('\n=== DEMO DATA SUMMARY ==='))
         self.stdout.write(f'👤 Demo User: {demo_user.email}')
         self.stdout.write(f'💳 Accounts: {total_accounts}')
+        self.stdout.write(f'🏠 Assets: {total_assets}')
         self.stdout.write(f'💰 Transactions: {total_transactions}')
         self.stdout.write(f'📊 Budgets: {total_budgets}')
+        self.stdout.write(f'💎 Total Wealth: €{total_wealth:,.2f}')
         self.stdout.write(f'🔑 Login: demo@fintrack.com / demo123')
+        self.stdout.write(f'🔐 Admin: admin@fintrack.com / admin123')
         self.stdout.write(self.style.SUCCESS('\n✅ Demo data populated successfully!'))

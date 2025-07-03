@@ -25,6 +25,7 @@ urlpatterns = [
     path('health/', health_check),
     path('api/auth/', include('djoser.urls')),
     path('api/auth/', include('djoser.urls.jwt')),
+    path('api/auth/', include('authentication.urls')),
     path('api/', include('core.urls')),
     path('api/', include('transactions.urls')),
 ]
