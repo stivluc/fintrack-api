@@ -12,6 +12,7 @@ API REST pour une application de gestion budgétaire inspirée de Finary.
 ## Installation rapide
 
 ### 🚀 **Setup automatique**
+
 ```bash
 git clone <your-repo>
 cd fintrack-api
@@ -21,7 +22,7 @@ pip install -r requirements.txt
 
 # Configurer la base de données Supabase
 cp .env.example .env
-# Éditer .env avec votre URL Supabase
+# ⚠️ IMPORTANT: Éditer .env avec VOTRE URL Supabase (remplacer YOUR_SUPABASE_PASSWORD et YOUR_PROJECT_ID)
 
 # Configuration automatique
 python setup_demo.py
@@ -31,6 +32,7 @@ python manage.py runserver
 ```
 
 ### 🔧 **Setup manuel (si besoin)**
+
 ```bash
 # 1. Configuration environnement
 cp .env.example .env
@@ -46,18 +48,21 @@ python manage.py runserver
 ```
 
 ### 🔑 **Comptes de démo créés automatiquement**
+
 - **Demo User** : `demo@fintrack.com` / `demo123`
 - **Admin** : `admin@fintrack.com` / `admin123`
 
 ## Endpoints API
 
 ### Authentification
+
 - `POST /api/auth/users/` - Créer un compte
 - `POST /api/auth/jwt/create/` - Se connecter (obtenir token JWT)
 - `POST /api/auth/jwt/refresh/` - Renouveler le token
 - `GET /api/auth/users/me/` - Obtenir le profil utilisateur
 
 ### Catégories
+
 - `GET /api/categories/` - Lister les catégories
 - `POST /api/categories/` - Créer une catégorie personnalisée
 - `GET /api/categories/{id}/` - Détail d'une catégorie
@@ -65,6 +70,7 @@ python manage.py runserver
 - `DELETE /api/categories/{id}/` - Supprimer une catégorie
 
 ### Comptes
+
 - `GET /api/accounts/` - Lister les comptes
 - `POST /api/accounts/` - Créer un compte
 - `GET /api/accounts/{id}/` - Détail d'un compte
@@ -72,6 +78,7 @@ python manage.py runserver
 - `DELETE /api/accounts/{id}/` - Supprimer un compte
 
 ### Transactions
+
 - `GET /api/transactions/` - Lister les transactions
 - `POST /api/transactions/` - Créer une transaction
 - `GET /api/transactions/{id}/` - Détail d'une transaction
@@ -80,6 +87,7 @@ python manage.py runserver
 - `GET /api/transactions/dashboard_stats/` - Statistiques du dashboard
 
 ### Budgets
+
 - `GET /api/budgets/` - Lister les budgets
 - `POST /api/budgets/` - Créer un budget
 - `GET /api/budgets/{id}/` - Détail d'un budget
@@ -90,6 +98,7 @@ python manage.py runserver
 ## Filtres et recherche
 
 ### Transactions
+
 - Filtrer par catégorie: `?category=1`
 - Filtrer par compte: `?account=1`
 - Filtrer par date: `?date__gte=2024-01-01&date__lte=2024-12-31`
@@ -97,6 +106,7 @@ python manage.py runserver
 - Tri: `?ordering=-date`
 
 ### Comptes
+
 - Filtrer par type: `?type=CHECKING`
 - Recherche: `?search=livret`
 
@@ -109,8 +119,8 @@ const response = await fetch('/api/auth/jwt/create/', {
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
     email: 'user@example.com',
-    password: 'password123'
-  })
+    password: 'password123',
+  }),
 });
 const { access } = await response.json();
 
@@ -119,15 +129,15 @@ await fetch('/api/transactions/', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${access}`
+    Authorization: `Bearer ${access}`,
   },
   body: JSON.stringify({
-    amount: 50.00,
+    amount: 50.0,
     date: '2024-01-15T10:30:00Z',
     description: 'Restaurant',
     category_id: 1,
-    account_id: 1
-  })
+    account_id: 1,
+  }),
 });
 ```
 
@@ -138,11 +148,13 @@ Accéder à l'interface d'administration Django: `http://localhost:8000/admin/`
 ## 🚀 Déploiement avec Supabase + Render
 
 ### Étape 1: Base de données Supabase
+
 1. Créer un compte sur [Supabase](https://supabase.com)
 2. Créer un nouveau projet
 3. Récupérer l'URL de connexion dans Settings > Database
 
 ### Étape 2: Déployer sur Render
+
 1. Créer un compte sur [Render](https://render.com)
 2. Connecter votre repository GitHub
 3. Créer un nouveau **Web Service**
@@ -151,6 +163,7 @@ Accéder à l'interface d'administration Django: `http://localhost:8000/admin/`
    - **Start Command**: `gunicorn fintrack.wsgi:application`
 
 ### Étape 3: Variables d'environnement Render
+
 ```env
 DJANGO_SETTINGS_MODULE=fintrack.settings.production
 SECRET_KEY=your-generated-secret-key
@@ -160,11 +173,14 @@ DEBUG=False
 ```
 
 ### Étape 4: Test de l'API
+
 Une fois déployé, tester:
+
 - `GET https://your-app.onrender.com/api/categories/` (doit être protégé)
 - `POST https://your-app.onrender.com/api/auth/jwt/create/` (login)
 
 ### Compte de démo
+
 - **Email**: demo@fintrack.com
 - **Password**: demo123
 

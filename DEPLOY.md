@@ -9,6 +9,7 @@
 ## Déploiement sur Render
 
 ### 1. Préparer le repository
+
 ```bash
 git add .
 git commit -m "FinTrack API ready for deployment"
@@ -18,6 +19,7 @@ git push origin main
 ### 2. Configuration Render
 
 #### Créer un Web Service sur [render.com](https://render.com)
+
 - **Repository** : Connecter votre GitHub repo
 - **Branch** : main
 - **Root Directory** : (laisser vide)
@@ -26,10 +28,11 @@ git push origin main
 - **Start Command** : `gunicorn fintrack.wsgi:application`
 
 #### Variables d'environnement
+
 ```env
 DJANGO_SETTINGS_MODULE=fintrack.settings.production
 SECRET_KEY=your-new-secret-key-here-generate-one
-DATABASE_URL=postgresql://postgres:oDDZjjO84sRtlRpB@db.jawqtsmaakoleszqyoeb.supabase.co:5432/postgres
+DATABASE_URL=postgresql://postgres:YOUR_SUPABASE_PASSWORD@db.jawqtsmaakoleszqyoeb.supabase.co:5432/postgres
 ALLOWED_HOSTS=your-app.onrender.com
 DEBUG=False
 ```
@@ -84,6 +87,7 @@ GET  /api/budgets/alerts/           # Alertes budget
 ## Surveillance
 
 Une fois déployé, surveiller :
+
 - **Logs Render** pour les erreurs
 - **Interface admin** pour vérifier les données
 - **Tests API** avec le script test_api.py
