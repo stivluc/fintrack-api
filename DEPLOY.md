@@ -25,7 +25,7 @@ git push origin main
 - **Root Directory** : (laisser vide)
 - **Runtime** : Python 3
 - **Build Command** : `./build.sh`
-- **Start Command** : `gunicorn fintrack.wsgi:application`
+- **Start Command** : `./start.sh`
 
 #### Variables d'environnement
 
@@ -87,23 +87,27 @@ GET  /api/budgets/alerts/           # Alertes budget
 
 ## 🔧 Dépannage des erreurs courantes
 
+### Erreur `Network is unreachable` lors du build
+**Solution** : Le build utilise maintenant SQLite temporaire, la vraie DB est utilisée au runtime
+
 ### Erreur `No module named 'pkg_resources'`
 **Solution** : Ajouté `setuptools==75.8.0` dans requirements.txt
 
-### Erreur de build Django
-**Solution** : Script build.sh amélioré avec gestion d'erreurs
-
-### Erreur de connexion base de données
+### Erreur de connexion base de données au runtime
 **Vérifier** : 
 - Variable `DATABASE_URL` correctement configurée
 - Mot de passe Supabase correct
 - Connexions autorisées dans Supabase
+- IP de Render autorisée dans Supabase
 
 ### Variables d'environnement manquantes
 **Vérifier** :
 - `SECRET_KEY` généré
 - `DJANGO_SETTINGS_MODULE=fintrack.settings.production`
 - `DATABASE_URL` avec vraies credentials
+
+### Données de démo manquantes
+**Solution** : Le script `post_deploy.py` s'exécute automatiquement au démarrage
 
 ## Surveillance
 
