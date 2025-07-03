@@ -19,10 +19,12 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from .health import health_check
+from .populate_view import populate_data_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('health/', health_check),
+    path('populate-data/', populate_data_view),  # Vue temporaire
     path('api/auth/', include('djoser.urls')),
     path('api/auth/', include('djoser.urls.jwt')),
     path('api/auth/', include('authentication.urls')),

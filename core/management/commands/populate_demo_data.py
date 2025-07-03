@@ -133,7 +133,78 @@ class Command(BaseCommand):
             else:
                 current_date = current_date.replace(month=current_date.month + 1)
         
-        # 5. Générer transactions aléatoires variées
+        # 5. Ajouter des transactions spécifiques pour les 30 derniers jours (juin-juillet 2025)
+        recent_transactions = [
+            # REVENUS
+            (date(2025, 6, 25), 'Salaire mensuel', 3200.00, income_categories[0]),
+            (date(2025, 6, 15), 'Projet freelance', 800.00, income_categories[1] if len(income_categories) > 1 else income_categories[0]),
+            (date(2025, 6, 10), 'Remboursement frais', 150.00, income_categories[-1]),
+            
+            # LOGEMENT
+            (date(2025, 6, 1), 'Loyer juin', -1450.00, expense_categories[2]),
+            (date(2025, 6, 5), 'Facture électricité', -89.50, expense_categories[2]),
+            (date(2025, 6, 12), 'Abonnement internet', -29.99, expense_categories[2]),
+            
+            # ALIMENTATION
+            (date(2025, 6, 2), 'Courses Carrefour', -67.80, expense_categories[0]),
+            (date(2025, 6, 6), 'Boulangerie', -12.40, expense_categories[0]),
+            (date(2025, 6, 9), 'Supermarché Leclerc', -89.60, expense_categories[0]),
+            (date(2025, 6, 13), 'Marché local', -23.50, expense_categories[0]),
+            (date(2025, 6, 16), 'Restaurant midi', -18.90, expense_categories[0]),
+            (date(2025, 6, 20), 'Courses bio', -54.30, expense_categories[0]),
+            (date(2025, 6, 23), 'Pizza livraison', -24.50, expense_categories[0]),
+            (date(2025, 6, 27), 'Courses weekend', -73.20, expense_categories[0]),
+            (date(2025, 6, 30), 'Café bureau', -8.60, expense_categories[0]),
+            (date(2025, 7, 2), 'Courses juillet', -45.80, expense_categories[0]),
+            
+            # TRANSPORT
+            (date(2025, 6, 3), 'Essence BP', -52.30, expense_categories[1]),
+            (date(2025, 6, 11), 'Péage autoroute', -15.40, expense_categories[1]),
+            (date(2025, 6, 18), 'Parking centre-ville', -8.00, expense_categories[1]),
+            (date(2025, 6, 24), 'Essence Total', -49.70, expense_categories[1]),
+            (date(2025, 7, 1), 'Lavage auto', -12.00, expense_categories[1]),
+            
+            # LOISIRS
+            (date(2025, 6, 7), 'Cinéma', -22.00, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
+            (date(2025, 6, 14), 'Livre Amazon', -15.99, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
+            (date(2025, 6, 21), 'Concert', -45.00, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
+            (date(2025, 6, 28), 'Abonnement Netflix', -13.49, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
+            
+            # SANTÉ
+            (date(2025, 6, 8), 'Pharmacie', -18.60, expense_categories[3]),
+            (date(2025, 6, 19), 'Médecin généraliste', -25.00, expense_categories[3]),
+            
+            # SHOPPING
+            (date(2025, 6, 4), 'Vêtements Zara', -89.90, expense_categories[5] if len(expense_categories) > 5 else expense_categories[-1]),
+            (date(2025, 6, 17), 'Accessoires téléphone', -24.99, expense_categories[5] if len(expense_categories) > 5 else expense_categories[-1]),
+            (date(2025, 6, 26), 'Chaussures', -75.00, expense_categories[5] if len(expense_categories) > 5 else expense_categories[-1]),
+            
+            # ÉPARGNE/INVESTISSEMENT
+            (date(2025, 6, 26), 'Virement épargne', -500.00, expense_categories[-1]),
+            (date(2025, 6, 26), 'Placement PEA', -300.00, expense_categories[-1]),
+        ]
+        
+        # Créer les transactions des 30 derniers jours
+        for trans_date, description, amount, category in recent_transactions:
+            # Vérifier si la transaction existe déjà
+            if not Transaction.objects.filter(
+                date=trans_date,
+                description=description,
+                amount=amount,
+                user=demo_user
+            ).exists():
+                Transaction.objects.create(
+                    amount=amount,
+                    date=trans_date,
+                    description=description,
+                    category=category,
+                    account=accounts[0],  # Compte courant
+                    user=demo_user,
+                    metadata={'recent_data': True}
+                )
+                transactions_created += 1
+        
+        # 6. Générer quelques transactions aléatoires pour compléter l'historique
         random_transactions = [
             # Alimentation
             ('Courses Carrefour', 45.80, expense_categories[0]),
@@ -146,48 +217,40 @@ class Command(BaseCommand):
             ('Essence', 65.00, expense_categories[1]),
             ('Péage autoroute', 12.80, expense_categories[1]),
             ('Parking', 8.50, expense_categories[1]),
-            ('Réparation voiture', 180.00, expense_categories[1]),
             
             # Loisirs
-            ('Cinéma', 24.00, expense_categories[4]),
-            ('Concert', 85.00, expense_categories[4]),
-            ('Livre', 18.90, expense_categories[4]),
-            ('Streaming Netflix', 13.99, expense_categories[4]),
-            ('Salle de sport', 39.90, expense_categories[4]),
-            
-            # Shopping
-            ('Zara', 89.90, expense_categories[5]),
-            ('Amazon', 45.67, expense_categories[5]),
-            ('Pharmacie', 23.45, expense_categories[5]),
-            ('Coiffeur', 35.00, expense_categories[5]),
-            
-            # Santé
-            ('Consultation médecin', 25.00, expense_categories[3]),
-            ('Pharmacie médicaments', 18.50, expense_categories[3]),
-            ('Dentiste', 65.00, expense_categories[3]),
+            ('Cinéma', 24.00, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
+            ('Concert', 85.00, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
+            ('Livre', 18.90, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
             
             # Revenus additionnels
-            ('Freelance mission', 800.00, income_categories[1]),
-            ('Remboursement', 45.00, income_categories[3]),
-            ('Vente occasion', 120.00, income_categories[3]),
+            ('Freelance mission', 600.00, income_categories[1] if len(income_categories) > 1 else income_categories[0]),
+            ('Remboursement', 45.00, income_categories[-1]),
         ]
         
-        # Générer sur 6 mois
-        for i in range(120):  # Environ 2 transactions par jour
+        # Générer quelques transactions pour l'historique (période avant juin 2025)
+        historical_start = start_date
+        historical_end = date(2025, 5, 31)  # Avant les données récentes
+        
+        for i in range(80):  # Moins de transactions historiques
             trans_data = random.choice(random_transactions)
-            random_date = start_date + timedelta(days=random.randint(0, 180))
-            random_account = random.choice(accounts)
-            
-            Transaction.objects.create(
-                amount=trans_data[1],
-                date=random_date,
-                description=trans_data[0],
-                category=trans_data[2],
-                account=random_account,
-                user=demo_user,
-                metadata={'generated': True}
-            )
-            transactions_created += 1
+            # Générer des dates entre start_date et mai 2025
+            days_diff = (historical_end - historical_start.date()).days
+            if days_diff > 0:
+                random_days = random.randint(0, days_diff)
+                random_date = historical_start.date() + timedelta(days=random_days)
+                random_account = random.choice(accounts)
+                
+                Transaction.objects.create(
+                    amount=trans_data[1],
+                    date=random_date,
+                    description=trans_data[0],
+                    category=trans_data[2],
+                    account=random_account,
+                    user=demo_user,
+                    metadata={'generated': True}
+                )
+                transactions_created += 1
         
         self.stdout.write(self.style.SUCCESS(f'✓ {transactions_created} transactions created'))
         
