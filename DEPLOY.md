@@ -32,7 +32,7 @@ git push origin main
 ```env
 DJANGO_SETTINGS_MODULE=fintrack.settings.production
 SECRET_KEY=your-new-secret-key-here-generate-one
-DATABASE_URL=postgresql://postgres:YOUR_SUPABASE_PASSWORD@db.jawqtsmaakoleszqyoeb.supabase.co:5432/postgres
+DATABASE_URL=postgresql://postgres.YOUR_PROJECT_ID:YOUR_SUPABASE_PASSWORD@aws-0-eu-north-1.pooler.supabase.com:6543/postgres
 DEBUG=False
 ```
 
