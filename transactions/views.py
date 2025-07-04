@@ -110,15 +110,15 @@ class TransactionViewSet(viewsets.ModelViewSet):
         
         # Évolution du patrimoine sur la période demandée
         wealth_evolution = []
-        current_date = start_date
+        current_loop_date = start_date
         
-        while current_date <= end_date:
+        while current_loop_date <= end_date:
             # Calculate wealth for the current date
             # This is a simplified simulation. In a real app, you'd track historical asset values and account balances.
             # For demo purposes, we'll simulate fluctuations around the current total_wealth.
             
             # Get transactions up to this date
-            transactions_up_to_date = queryset.filter(date__lte=current_date.date())
+            transactions_up_to_date = queryset.filter(date__lte=current_loop_date.date())
             
             # Calculate income and expenses up to this date
             income_up_to_date = transactions_up_to_date.filter(category__type='INCOME').aggregate(total=Sum('amount'))['total'] or 0
@@ -126,7 +126,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
             
             # Simulate asset value changes over time
             # This is a placeholder for more complex asset tracking
-            simulated_asset_value = float(total_assets) * (1 + (current_date - start_date).days / 365.0 * 0.05) # 5% annual growth
+            simulated_asset_value = float(total_assets) * (1 + (current_loop_date - start_date).days / 365.0 * 0.05) # 5% annual growth
             
             # Simulate account balance changes based on income/expenses
             simulated_account_balance = float(total_accounts) + float(income_up_to_date) + float(expenses_up_to_date)
@@ -137,10 +137,10 @@ class TransactionViewSet(viewsets.ModelViewSet):
             daily_wealth = simulated_asset_value + simulated_account_balance + fluctuation
 
             wealth_evolution.append({
-                'date': current_date.strftime('%Y-%m-%d'),
+                'date': current_loop_date.strftime('%Y-%m-%d'),
                 'wealth': round(daily_wealth, 2)
             })
-            current_date += timedelta(days=1) # Increment by day for more granular data
+            current_loop_date += timedelta(days=1) # Increment by day for more granular data
         
         # Composition du patrimoine
         assets = Asset.objects.filter(user=user, is_active=True)

@@ -26,10 +26,12 @@ class Command(BaseCommand):
                 'is_premium': True,
             }
         )
+        demo_user.set_password('demo123')
+        demo_user.save()
         if created:
-            demo_user.set_password('demo123')
-            demo_user.save()
             self.stdout.write(self.style.SUCCESS('✓ Demo user created'))
+        else:
+            self.stdout.write(self.style.SUCCESS('✓ Demo user updated (password reset)'))
         
         # Créer un admin
         admin_user, created = User.objects.get_or_create(
@@ -43,10 +45,12 @@ class Command(BaseCommand):
                 'is_premium': True,
             }
         )
+        admin_user.set_password('admin123')
+        admin_user.save()
         if created:
-            admin_user.set_password('admin123')
-            admin_user.save()
             self.stdout.write(self.style.SUCCESS('✓ Admin user created'))
+        else:
+            self.stdout.write(self.style.SUCCESS('✓ Admin user updated (password reset)'))
         
         # 2. Créer des comptes
         accounts_data = [
