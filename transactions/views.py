@@ -27,13 +27,63 @@ class TransactionViewSet(viewsets.ModelViewSet):
     serializer_class = TransactionSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['category', 'account', 'is_recurring']
+    filterset_fields = {
+        'category': ['exact'],
+        'account': ['exact'],
+        'date': ['gte', 'lte', 'year', 'month'],
+        'amount': ['gte', 'lte'],
+        'is_recurring': ['exact'],
+    }
     search_fields = ['description']
-    ordering_fields = ['date', 'amount', 'created_at']
+    ordering_fields = ['date', 'amount', 'created_at', 'category__name', 'account__name']
     ordering = ['-date', '-created_at']
     
     def get_queryset(self):
         return Transaction.objects.filter(user=self.request.user)
+    
+    def _generate_wealth_evolution(self, user, current_wealth, period, now):
+        """Generate wealth evolution data based on period"""
+        wealth_evolution = []
+        
+        # Define period parameters
+        period_config = {
+            '1M': {'days': 30, 'points': 15, 'format': '%d %b'},
+            '6M': {'days': 180, 'points': 24, 'format': '%b'},
+            '1Y': {'days': 365, 'points': 12, 'format': '%b %y'},
+            'YTD': {'days': (now - datetime(now.year, 1, 1)).days, 'points': max(12, now.month), 'format': '%b'},
+            'MAX': {'days': 365 * 5, 'points': 60, 'format': '%b %y'}
+        }
+        
+        config = period_config.get(period, period_config['6M'])
+        total_days = config['days']
+        num_points = config['points']
+        date_format = config['format']
+        
+        # Calculate interval between points
+        interval_days = max(1, total_days // num_points)
+        
+        base_wealth = float(current_wealth)
+        
+        for i in range(num_points):
+            # Calculate date for this point
+            days_back = total_days - (i * interval_days)
+            point_date = now - timedelta(days=days_back)
+            
+            # Simulate wealth evolution (more sophisticated logic could be added)
+            # For now, simulate gradual growth with some variation
+            growth_factor = 1 - (days_back / total_days) * 0.15  # 15% growth over the period
+            variation = 0.02 * (i % 3 - 1)  # Add some variation
+            point_wealth = base_wealth * (growth_factor + variation)
+            
+            # Ensure wealth is always positive
+            point_wealth = max(0, point_wealth)
+            
+            wealth_evolution.append({
+                'month': point_date.strftime(date_format),
+                'wealth': round(point_wealth, 2)
+            })
+        
+        return wealth_evolution
     
     @action(detail=False, methods=['get'])
     def dashboard_stats(self, request):
@@ -41,6 +91,9 @@ class TransactionViewSet(viewsets.ModelViewSet):
         
         user = request.user
         now = datetime.now()
+        
+        # Get time period filter from query params
+        period = request.query_params.get('period', '6M')
         
         # Calcul sur les 30 derniers jours (au lieu du mois courant)
         thirty_days_ago = now - timedelta(days=30)
@@ -91,25 +144,8 @@ class TransactionViewSet(viewsets.ModelViewSet):
         previous_savings = previous_income + previous_expenses
         savings_change = ((current_savings - previous_savings) / abs(previous_savings) * 100) if previous_savings != 0 else 0
         
-        # Évolution du patrimoine sur 6 mois
-        six_months_ago = now - timedelta(days=180)
-        wealth_evolution = []
-        
-        for i in range(6):
-            month_date = now - timedelta(days=i*30)
-            month_start = month_date.replace(day=1)
-            
-            # Simuler l'évolution du patrimoine (on pourrait stocker l'historique dans le futur)
-            base_wealth = float(total_wealth)
-            variation = (i * 0.02 + (i % 2) * 0.01) * base_wealth  # Simulation d'une croissance
-            month_wealth = base_wealth - variation
-            
-            wealth_evolution.append({
-                'month': month_start.strftime('%b'),
-                'wealth': round(month_wealth, 2)
-            })
-        
-        wealth_evolution.reverse()
+        # Évolution du patrimoine selon la période demandée
+        wealth_evolution = self._generate_wealth_evolution(user, total_wealth, period, now)
         
         # Composition du patrimoine
         assets = Asset.objects.filter(user=user, is_active=True)
