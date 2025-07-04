@@ -69,6 +69,10 @@ class Command(BaseCommand):
                     'balance': acc_data['balance']
                 }
             )
+            # Si le compte existe déjà, on s'assure qu'il a le bon solde
+            if not created:
+                account.balance = acc_data['balance']
+                account.save()
             accounts.append(account)
         
         self.stdout.write(self.style.SUCCESS(f'✓ {len(accounts)} accounts created'))
@@ -118,17 +122,26 @@ class Command(BaseCommand):
         current_date = start_date
         while current_date <= end_date:
             for trans_data in recurring_transactions:
-                Transaction.objects.create(
-                    amount=trans_data['amount'],
-                    date=current_date.replace(day=min(current_date.day, 28)),
+                transaction_date = current_date.replace(day=min(current_date.day, 28))
+                # Vérifier si la transaction récurrente existe déjà
+                if not Transaction.objects.filter(
+                    date=transaction_date,
                     description=trans_data['description'],
-                    category=trans_data['category'],
-                    account=trans_data['account'],
+                    amount=trans_data['amount'],
                     user=demo_user,
-                    is_recurring=trans_data['is_recurring'],
-                    metadata={'frequency': trans_data['frequency']}
-                )
-                transactions_created += 1
+                    is_recurring=True
+                ).exists():
+                    Transaction.objects.create(
+                        amount=trans_data['amount'],
+                        date=transaction_date,
+                        description=trans_data['description'],
+                        category=trans_data['category'],
+                        account=trans_data['account'],
+                        user=demo_user,
+                        is_recurring=trans_data['is_recurring'],
+                        metadata={'frequency': trans_data['frequency']}
+                    )
+                    transactions_created += 1
             
             # Passer au mois suivant
             if current_date.month == 12:
@@ -248,6 +261,9 @@ class Command(BaseCommand):
         historical_start = start_date
         historical_end = date(2025, 5, 31)  # Avant les données récentes
         
+        # Supprimer les anciennes transactions générées pour éviter les duplicatas
+        Transaction.objects.filter(user=demo_user, metadata__generated=True).delete()
+        
         for i in range(100):  # Moins de transactions historiques
             trans_data = random.choice(random_transactions)
             # Générer des dates entre start_date et mai 2025
@@ -281,7 +297,7 @@ class Command(BaseCommand):
         
         budgets_created = 0
         for budget_data in budgets_data:
-            Budget.objects.get_or_create(
+            budget, created = Budget.objects.get_or_create(
                 category=budget_data['category'],
                 user=demo_user,
                 defaults={
@@ -290,6 +306,11 @@ class Command(BaseCommand):
                     'is_active': True
                 }
             )
+            # Si le budget existe déjà, on s'assure qu'il a la bonne limite
+            if not created:
+                budget.monthly_limit = budget_data['limit']
+                budget.is_active = True
+                budget.save()
             budgets_created += 1
         
         self.stdout.write(self.style.SUCCESS(f'✓ {budgets_created} budgets created'))
@@ -373,11 +394,15 @@ class Command(BaseCommand):
             growth_factor = (1 + annual_growth_rate) ** Decimal(days_since_purchase / 365.25)
             asset_data['current_value'] = round(Decimal(asset_data['purchase_price']) * growth_factor, 2)
 
-            Asset.objects.get_or_create(
+            asset, created = Asset.objects.get_or_create(
                 name=asset_data['name'],
                 user=demo_user,
                 defaults=asset_data
             )
+            # Si l'asset existe déjà, on met à jour sa valeur
+            if not created:
+                asset.current_value = asset_data['current_value']
+                asset.save()
             assets_created += 1
         
         self.stdout.write(self.style.SUCCESS(f'✓ {assets_created} assets created'))

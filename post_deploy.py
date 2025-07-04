@@ -24,6 +24,22 @@ def main():
         print("📊 Running migrations...")
         execute_from_command_line(['manage.py', 'migrate', '--noinput'])
         
+        # Nettoyer les données existantes pour éviter les duplicatas
+        print("🧹 Cleaning existing demo data...")
+        execute_from_command_line(['manage.py', 'shell', '-c', '''
+from django.contrib.auth import get_user_model
+from core.models import Account, Asset, Category
+from transactions.models import Transaction, Budget
+User = get_user_model()
+demo_user = User.objects.filter(email="demo@fintrack.com").first()
+if demo_user:
+    Transaction.objects.filter(user=demo_user).delete()
+    Budget.objects.filter(user=demo_user).delete()
+    Asset.objects.filter(user=demo_user).delete()
+    Account.objects.filter(user=demo_user).delete()
+    print("✅ Demo data cleaned")
+'''])
+        
         # Populate les catégories
         print("📂 Populating categories...")
         execute_from_command_line(['manage.py', 'populate_categories'])
