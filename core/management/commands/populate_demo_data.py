@@ -10,10 +10,13 @@ import random
 User = get_user_model()
 
 
+from django.core.management import call_command
+
 class Command(BaseCommand):
     help = 'Populate database with demo data'
 
     def handle(self, *args, **options):
+        call_command('populate_categories')
         self.stdout.write(self.style.SUCCESS('Creating demo data...'))
         
         # 1. Créer les utilisateurs de démo
@@ -50,10 +53,10 @@ class Command(BaseCommand):
         
         # 2. Créer des comptes
         accounts_data = [
-            {'name': 'Compte Courant', 'type': AccountType.CHECKING, 'balance': 2450.75},
-            {'name': 'Livret A', 'type': AccountType.SAVINGS, 'balance': 8950.00},
-            {'name': 'PEA', 'type': AccountType.INVESTMENT, 'balance': 15420.30},
-            {'name': 'Espèces', 'type': AccountType.CASH, 'balance': 125.50},
+            {'name': 'Compte Courant', 'type': AccountType.CHECKING, 'balance': 3250.75},
+            {'name': 'Livret A', 'type': AccountType.SAVINGS, 'balance': 12500.00},
+            {'name': 'PEA', 'type': AccountType.INVESTMENT, 'balance': 25420.30},
+            {'name': 'Espèces', 'type': AccountType.CASH, 'balance': 150.50},
         ]
         
         accounts = []
@@ -87,7 +90,7 @@ class Command(BaseCommand):
         recurring_transactions = [
             {
                 'description': 'Salaire mensuel',
-                'amount': 3500.00,
+                'amount': 4200.00,
                 'category': income_categories[0],  # Salaire
                 'account': accounts[0],  # Compte courant
                 'is_recurring': True,
@@ -95,7 +98,7 @@ class Command(BaseCommand):
             },
             {
                 'description': 'Loyer',
-                'amount': 1200.00,
+                'amount': 1300.00,
                 'category': expense_categories[2],  # Logement
                 'account': accounts[0],
                 'is_recurring': True,
@@ -103,7 +106,7 @@ class Command(BaseCommand):
             },
             {
                 'description': 'Abonnement transports',
-                'amount': 75.00,
+                'amount': 85.00,
                 'category': expense_categories[1],  # Transport
                 'account': accounts[0],
                 'is_recurring': True,
@@ -149,52 +152,52 @@ class Command(BaseCommand):
         
         recent_transactions = [
             # REVENUS
-            (date(2025, 6, 25), 'Salaire mensuel', 3200.00, salaire_cat),
-            (date(2025, 6, 15), 'Projet freelance', 800.00, freelance_cat),
-            (date(2025, 6, 10), 'Remboursement frais', 150.00, autres_revenus_cat),
+            (date(2025, 6, 25), 'Salaire mensuel', 4200.00, salaire_cat),
+            (date(2025, 6, 15), 'Projet freelance', 1200.00, freelance_cat),
+            (date(2025, 6, 10), 'Remboursement frais', 250.00, autres_revenus_cat),
             
             # LOGEMENT
-            (date(2025, 6, 1), 'Loyer juin', -1450.00, expense_categories[2]),
-            (date(2025, 6, 5), 'Facture électricité', -89.50, expense_categories[2]),
-            (date(2025, 6, 12), 'Abonnement internet', -29.99, expense_categories[2]),
+            (date(2025, 6, 1), 'Loyer juin', -1300.00, expense_categories[2]),
+            (date(2025, 6, 5), 'Facture électricité', -75.50, expense_categories[2]),
+            (date(2025, 6, 12), 'Abonnement internet', -39.99, expense_categories[2]),
             
             # ALIMENTATION
-            (date(2025, 6, 2), 'Courses Carrefour', -67.80, expense_categories[0]),
-            (date(2025, 6, 6), 'Boulangerie', -12.40, expense_categories[0]),
-            (date(2025, 6, 9), 'Supermarché Leclerc', -89.60, expense_categories[0]),
-            (date(2025, 6, 13), 'Marché local', -23.50, expense_categories[0]),
-            (date(2025, 6, 16), 'Restaurant midi', -18.90, expense_categories[0]),
-            (date(2025, 6, 20), 'Courses bio', -54.30, expense_categories[0]),
-            (date(2025, 6, 23), 'Pizza livraison', -24.50, expense_categories[0]),
-            (date(2025, 6, 27), 'Courses weekend', -73.20, expense_categories[0]),
-            (date(2025, 6, 30), 'Café bureau', -8.60, expense_categories[0]),
-            (date(2025, 7, 2), 'Courses juillet', -45.80, expense_categories[0]),
+            (date(2025, 6, 2), 'Courses Carrefour', -85.30, expense_categories[0]),
+            (date(2025, 6, 6), 'Boulangerie', -15.40, expense_categories[0]),
+            (date(2025, 6, 9), 'Supermarché Leclerc', -95.60, expense_categories[0]),
+            (date(2025, 6, 13), 'Marché local', -33.50, expense_categories[0]),
+            (date(2025, 6, 16), 'Restaurant midi', -22.90, expense_categories[0]),
+            (date(2025, 6, 20), 'Courses bio', -64.30, expense_categories[0]),
+            (date(2025, 6, 23), 'Pizza livraison', -28.50, expense_categories[0]),
+            (date(2025, 6, 27), 'Courses weekend', -83.20, expense_categories[0]),
+            (date(2025, 6, 30), 'Café bureau', -12.60, expense_categories[0]),
+            (date(2025, 7, 2), 'Courses juillet', -55.80, expense_categories[0]),
             
             # TRANSPORT
-            (date(2025, 6, 3), 'Essence BP', -52.30, expense_categories[1]),
-            (date(2025, 6, 11), 'Péage autoroute', -15.40, expense_categories[1]),
-            (date(2025, 6, 18), 'Parking centre-ville', -8.00, expense_categories[1]),
-            (date(2025, 6, 24), 'Essence Total', -49.70, expense_categories[1]),
-            (date(2025, 7, 1), 'Lavage auto', -12.00, expense_categories[1]),
+            (date(2025, 6, 3), 'Essence BP', -62.30, expense_categories[1]),
+            (date(2025, 6, 11), 'Péage autoroute', -25.40, expense_categories[1]),
+            (date(2025, 6, 18), 'Parking centre-ville', -12.00, expense_categories[1]),
+            (date(2025, 6, 24), 'Essence Total', -59.70, expense_categories[1]),
+            (date(2025, 7, 1), 'Lavage auto', -15.00, expense_categories[1]),
             
             # LOISIRS
-            (date(2025, 6, 7), 'Cinéma', -22.00, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
-            (date(2025, 6, 14), 'Livre Amazon', -15.99, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
-            (date(2025, 6, 21), 'Concert', -45.00, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
-            (date(2025, 6, 28), 'Abonnement Netflix', -13.49, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
+            (date(2025, 6, 7), 'Cinéma', -25.00, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
+            (date(2025, 6, 14), 'Livre Amazon', -19.99, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
+            (date(2025, 6, 21), 'Concert', -55.00, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
+            (date(2025, 6, 28), 'Abonnement Netflix', -15.49, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
             
             # SANTÉ
-            (date(2025, 6, 8), 'Pharmacie', -18.60, expense_categories[3]),
-            (date(2025, 6, 19), 'Médecin généraliste', -25.00, expense_categories[3]),
+            (date(2025, 6, 8), 'Pharmacie', -22.60, expense_categories[3]),
+            (date(2025, 6, 19), 'Médecin généraliste', -30.00, expense_categories[3]),
             
             # SHOPPING
-            (date(2025, 6, 4), 'Vêtements Zara', -89.90, expense_categories[5] if len(expense_categories) > 5 else expense_categories[-1]),
-            (date(2025, 6, 17), 'Accessoires téléphone', -24.99, expense_categories[5] if len(expense_categories) > 5 else expense_categories[-1]),
-            (date(2025, 6, 26), 'Chaussures', -75.00, expense_categories[5] if len(expense_categories) > 5 else expense_categories[-1]),
+            (date(2025, 6, 4), 'Vêtements Zara', -99.90, expense_categories[5] if len(expense_categories) > 5 else expense_categories[-1]),
+            (date(2025, 6, 17), 'Accessoires téléphone', -29.99, expense_categories[5] if len(expense_categories) > 5 else expense_categories[-1]),
+            (date(2025, 6, 26), 'Chaussures', -85.00, expense_categories[5] if len(expense_categories) > 5 else expense_categories[-1]),
             
             # ÉPARGNE/INVESTISSEMENT
-            (date(2025, 6, 26), 'Virement épargne', -500.00, expense_categories[-1]),
-            (date(2025, 6, 26), 'Placement PEA', -300.00, expense_categories[-1]),
+            (date(2025, 6, 26), 'Virement épargne', -600.00, expense_categories[-1]),
+            (date(2025, 6, 26), 'Placement PEA', -400.00, expense_categories[-1]),
         ]
         
         # Créer les transactions des 30 derniers jours
@@ -220,32 +223,32 @@ class Command(BaseCommand):
         # 6. Générer quelques transactions aléatoires pour compléter l'historique
         random_transactions = [
             # Alimentation
-            ('Courses Carrefour', 45.80, expense_categories[0]),
-            ('Restaurant Le Bistrot', 28.50, expense_categories[0]),
-            ('Boulangerie', 12.30, expense_categories[0]),
-            ('Uber Eats', 22.90, expense_categories[0]),
-            ('Marché bio', 35.60, expense_categories[0]),
+            ('Courses Carrefour', 55.80, expense_categories[0]),
+            ('Restaurant Le Bistrot', 38.50, expense_categories[0]),
+            ('Boulangerie', 18.30, expense_categories[0]),
+            ('Uber Eats', 25.90, expense_categories[0]),
+            ('Marché bio', 45.60, expense_categories[0]),
             
             # Transport
-            ('Essence', 65.00, expense_categories[1]),
-            ('Péage autoroute', 12.80, expense_categories[1]),
-            ('Parking', 8.50, expense_categories[1]),
+            ('Essence', 75.00, expense_categories[1]),
+            ('Péage autoroute', 18.80, expense_categories[1]),
+            ('Parking', 10.50, expense_categories[1]),
             
             # Loisirs
-            ('Cinéma', 24.00, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
-            ('Concert', 85.00, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
-            ('Livre', 18.90, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
+            ('Cinéma', 28.00, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
+            ('Concert', 95.00, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
+            ('Livre', 22.90, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
             
             # Revenus additionnels
-            ('Freelance mission', 600.00, income_categories[1] if len(income_categories) > 1 else income_categories[0]),
-            ('Remboursement', 45.00, income_categories[-1]),
+            ('Freelance mission', 800.00, income_categories[1] if len(income_categories) > 1 else income_categories[0]),
+            ('Remboursement', 55.00, income_categories[-1]),
         ]
         
         # Générer quelques transactions pour l'historique (période avant juin 2025)
         historical_start = start_date
         historical_end = date(2025, 5, 31)  # Avant les données récentes
         
-        for i in range(80):  # Moins de transactions historiques
+        for i in range(100):  # Moins de transactions historiques
             trans_data = random.choice(random_transactions)
             # Générer des dates entre start_date et mai 2025
             days_diff = (historical_end - historical_start.date()).days
@@ -269,11 +272,11 @@ class Command(BaseCommand):
         
         # 6. Créer des budgets
         budgets_data = [
-            {'category': expense_categories[0], 'limit': 400.00},  # Alimentation
-            {'category': expense_categories[1], 'limit': 200.00},  # Transport
-            {'category': expense_categories[4], 'limit': 150.00},  # Loisirs
-            {'category': expense_categories[5], 'limit': 100.00},  # Shopping
-            {'category': expense_categories[3], 'limit': 80.00},   # Santé
+            {'category': expense_categories[0], 'limit': 500.00},  # Alimentation
+            {'category': expense_categories[1], 'limit': 250.00},  # Transport
+            {'category': expense_categories[4], 'limit': 200.00},  # Loisirs
+            {'category': expense_categories[5], 'limit': 150.00},  # Shopping
+            {'category': expense_categories[3], 'limit': 100.00},   # Santé
         ]
         
         budgets_created = 0
@@ -296,64 +299,64 @@ class Command(BaseCommand):
             {
                 'name': 'Appartement Paris 15ème',
                 'asset_type': AssetType.REAL_ESTATE,
-                'current_value': 285000.00,
-                'purchase_price': 250000.00,
+                'current_value': 150000.00,
+                'purchase_price': 120000.00,
                 'purchase_date': date(2020, 3, 15),
-                'description': 'Appartement 3 pièces de 65m² dans le 15ème arrondissement'
+                'description': 'Appartement 2 pièces de 45m² dans le 15ème arrondissement'
             },
             {
                 'name': 'Actions Total Energies',
                 'asset_type': AssetType.STOCKS,
-                'current_value': 12500.00,
-                'purchase_price': 10800.00,
+                'current_value': 25000.00,
+                'purchase_price': 20000.00,
                 'purchase_date': date(2021, 6, 10),
-                'description': '250 actions Total Energies'
+                'description': '500 actions Total Energies'
             },
             {
                 'name': 'Assurance Vie Crédit Agricole',
                 'asset_type': AssetType.INSURANCE,
-                'current_value': 18500.00,
-                'purchase_price': 15000.00,
+                'current_value': 35000.00,
+                'purchase_price': 30000.00,
                 'purchase_date': date(2019, 1, 20),
                 'description': 'Contrat d\'assurance vie multi-supports'
             },
             {
                 'name': 'Livret A',
                 'asset_type': AssetType.SAVINGS_ACCOUNT,
-                'current_value': 22300.00,
-                'purchase_price': 20000.00,
+                'current_value': 25000.00,
+                'purchase_price': 22000.00,
                 'purchase_date': date(2018, 9, 5),
                 'description': 'Livret A plafonné'
             },
             {
                 'name': 'PEL Banque Populaire',
                 'asset_type': AssetType.PENSION_PLAN,
-                'current_value': 18000.00,
-                'purchase_price': 16500.00,
+                'current_value': 20000.00,
+                'purchase_price': 18000.00,
                 'purchase_date': date(2019, 5, 12),
                 'description': 'Plan Épargne Logement'
             },
             {
                 'name': 'Portefeuille Crypto',
                 'asset_type': AssetType.CRYPTO,
-                'current_value': 8500.00,
-                'purchase_price': 12000.00,
+                'current_value': 15000.00,
+                'purchase_price': 10000.00,
                 'purchase_date': date(2021, 11, 28),
                 'description': 'Bitcoin, Ethereum et autres altcoins'
             },
             {
                 'name': 'Or physique',
                 'asset_type': AssetType.PRECIOUS_METALS,
-                'current_value': 3500.00,
-                'purchase_price': 3200.00,
+                'current_value': 5000.00,
+                'purchase_price': 4000.00,
                 'purchase_date': date(2020, 8, 14),
                 'description': 'Pièces et lingots d\'or'
             },
             {
                 'name': 'SCPI Immobilière',
                 'asset_type': AssetType.REAL_ESTATE,
-                'current_value': 15000.00,
-                'purchase_price': 14500.00,
+                'current_value': 20000.00,
+                'purchase_price': 18000.00,
                 'purchase_date': date(2022, 2, 18),
                 'description': 'Parts de SCPI de rendement'
             }
@@ -361,6 +364,15 @@ class Command(BaseCommand):
         
         assets_created = 0
         for asset_data in assets_data:
+            # Simulate asset value evolution
+            purchase_date = asset_data['purchase_date']
+            today = date.today()
+            days_since_purchase = (today - purchase_date).days
+            # Simulate a growth of 5% to 20% per year
+            annual_growth_rate = Decimal(random.uniform(0.05, 0.20))
+            growth_factor = (1 + annual_growth_rate) ** Decimal(days_since_purchase / 365.25)
+            asset_data['current_value'] = round(Decimal(asset_data['purchase_price']) * growth_factor, 2)
+
             Asset.objects.get_or_create(
                 name=asset_data['name'],
                 user=demo_user,

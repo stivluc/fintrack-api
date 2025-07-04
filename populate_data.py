@@ -5,18 +5,18 @@ Script temporaire pour exécuter la population de données
 """
 import os
 import django
-from django.core.management import execute_from_command_line
+from django.core.management import call_command
 
 # Configuration Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'fintrack.settings.production')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'fintrack.settings')
 django.setup()
 
 if __name__ == '__main__':
     # Exécuter les commandes de population
     print("🚀 Population des catégories...")
-    execute_from_command_line(['manage.py', 'populate_categories'])
+    call_command('populate_categories')
     
     print("🚀 Population des données de démo...")
-    execute_from_command_line(['manage.py', 'populate_demo_data'])
+    call_command('populate_demo_data')
     
     print("✅ Population terminée !")
