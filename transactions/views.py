@@ -34,6 +34,11 @@ class TransactionViewSet(viewsets.ModelViewSet):
     ordering = ['-date', '-created_at']
     
     def get_queryset(self):
+        # Debug: afficher les paramètres reçus
+        print(f"🔍 Request GET params: {dict(self.request.GET)}")
+        print(f"🔍 date_gte param: {self.request.GET.get('date_gte')}")
+        print(f"🔍 date_lte param: {self.request.GET.get('date_lte')}")
+        
         return Transaction.objects.filter(user=self.request.user)
     
     @action(detail=False, methods=['get'])
