@@ -1,42 +1,45 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django.db.models import Sum, Count, Avg, Max, Min
 from django.db.models.functions import TruncMonth, TruncDate
 from datetime import datetime, timedelta
 from calendar import monthrange
+import django_filters
 from .models import Transaction, Budget
 from .serializers import TransactionSerializer, BudgetSerializer
+
+
+class TransactionFilter(django_filters.FilterSet):
+    class Meta:
+        model = Transaction
+        fields = {
+            'category': ['exact'],
+            'account': ['exact'],
+            'date': ['gte', 'lte', 'year', 'month'],
+            'amount': ['gte', 'lte'],
+            'is_recurring': ['exact'],
+        }
 
 
 class TransactionViewSet(viewsets.ModelViewSet):
     serializer_class = TransactionSerializer
     permission_classes = [permissions.IsAuthenticated]
-    filter_backends = [SearchFilter, OrderingFilter]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = TransactionFilter
     search_fields = ['description']
     ordering_fields = ['date', 'amount', 'created_at']
     ordering = ['-date', '-created_at']
     
     def get_queryset(self):
-        queryset = Transaction.objects.filter(user=self.request.user)
+        # Debug: afficher les paramètres reçus
+        print(f"🔍 Request GET params: {dict(self.request.GET)}")
+        print(f"🔍 date_gte param: {self.request.GET.get('date_gte')}")
+        print(f"🔍 date_lte param: {self.request.GET.get('date_lte')}")
         
-        # Filtres manuels
-        date_gte = self.request.query_params.get('date_gte')
-        date_lte = self.request.query_params.get('date_lte')
-        category = self.request.query_params.get('category')
-        account = self.request.query_params.get('account')
-        
-        if date_gte:
-            queryset = queryset.filter(date__gte=date_gte)
-        if date_lte:
-            queryset = queryset.filter(date__lte=date_lte)
-        if category:
-            queryset = queryset.filter(category=category)
-        if account:
-            queryset = queryset.filter(account=account)
-            
-        return queryset
+        return Transaction.objects.filter(user=self.request.user)
     
     @action(detail=False, methods=['get'])
     def dashboard_stats(self, request):
