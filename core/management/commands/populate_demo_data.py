@@ -134,11 +134,24 @@ class Command(BaseCommand):
                 current_date = current_date.replace(month=current_date.month + 1)
         
         # 5. Ajouter des transactions spécifiques pour les 30 derniers jours (juin-juillet 2025)
+        # Récupérer les catégories par nom pour être sûr
+        salaire_cat = Category.objects.filter(name='Salaire', type=CategoryType.INCOME).first()
+        freelance_cat = Category.objects.filter(name='Freelance', type=CategoryType.INCOME).first()
+        autres_revenus_cat = Category.objects.filter(name='Autres revenus', type=CategoryType.INCOME).first()
+        
+        # Si pas trouvé, utiliser les listes existantes
+        if not salaire_cat and income_categories:
+            salaire_cat = income_categories[0]
+        if not freelance_cat and len(income_categories) > 1:
+            freelance_cat = income_categories[1]
+        if not autres_revenus_cat and income_categories:
+            autres_revenus_cat = income_categories[-1]
+        
         recent_transactions = [
             # REVENUS
-            (date(2025, 6, 25), 'Salaire mensuel', 3200.00, income_categories[0]),
-            (date(2025, 6, 15), 'Projet freelance', 800.00, income_categories[1] if len(income_categories) > 1 else income_categories[0]),
-            (date(2025, 6, 10), 'Remboursement frais', 150.00, income_categories[-1]),
+            (date(2025, 6, 25), 'Salaire mensuel', 3200.00, salaire_cat),
+            (date(2025, 6, 15), 'Projet freelance', 800.00, freelance_cat),
+            (date(2025, 6, 10), 'Remboursement frais', 150.00, autres_revenus_cat),
             
             # LOGEMENT
             (date(2025, 6, 1), 'Loyer juin', -1450.00, expense_categories[2]),

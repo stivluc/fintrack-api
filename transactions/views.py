@@ -41,16 +41,18 @@ class TransactionViewSet(viewsets.ModelViewSet):
         
         user = request.user
         now = datetime.now()
-        current_month_start = now.replace(day=1)
-        previous_month_start = (current_month_start - timedelta(days=1)).replace(day=1)
+        
+        # Calcul sur les 30 derniers jours (au lieu du mois courant)
+        thirty_days_ago = now - timedelta(days=30)
+        sixty_days_ago = now - timedelta(days=60)
         
         queryset = Transaction.objects.filter(user=user)
         
-        # Stats du mois courant
-        current_month_transactions = queryset.filter(date__gte=current_month_start)
+        # Stats des 30 derniers jours
+        current_month_transactions = queryset.filter(date__gte=thirty_days_ago.date())
         previous_month_transactions = queryset.filter(
-            date__gte=previous_month_start, 
-            date__lt=current_month_start
+            date__gte=sixty_days_ago.date(), 
+            date__lt=thirty_days_ago.date()
         )
         
         current_income = current_month_transactions.filter(category__type='INCOME').aggregate(
@@ -71,7 +73,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
         
         # Calcul des variations
         income_change = ((current_income - previous_income) / previous_income * 100) if previous_income > 0 else 0
-        expenses_change = ((abs(current_expenses) - abs(previous_expenses)) / abs(previous_expenses) * 100) if previous_expenses < 0 else 0
+        expenses_change = ((abs(current_expenses) - abs(previous_expenses)) / abs(previous_expenses) * 100) if previous_expenses != 0 else 0
         
         # Patrimoine total (assets + comptes)
         total_assets = Asset.objects.filter(user=user, is_active=True).aggregate(
