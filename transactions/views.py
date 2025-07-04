@@ -54,8 +54,8 @@ class TransactionViewSet(viewsets.ModelViewSet):
         return queryset
     
     def _generate_wealth_evolution(self, user, current_wealth, period, now):
-        """Generate wealth evolution data based on period"""
-        wealth_evolution = []
+        """Generate wealth evolution based on real transaction history"""
+        from django.db.models import Sum, Q
         
         # Define period parameters
         period_config = {
@@ -74,21 +74,38 @@ class TransactionViewSet(viewsets.ModelViewSet):
         # Calculate interval between points
         interval_days = max(1, total_days // num_points)
         
-        base_wealth = float(current_wealth)
+        wealth_evolution = []
+        running_wealth = float(current_wealth)
+        
+        # Get all transactions for the period
+        start_date = now - timedelta(days=total_days)
+        transactions = Transaction.objects.filter(
+            user=user,
+            date__gte=start_date.date()
+        ).order_by('-date')
         
         for i in range(num_points):
-            # Calculate date for this point
+            # Calculate date for this point (from oldest to newest)
             days_back = total_days - (i * interval_days)
             point_date = now - timedelta(days=days_back)
             
-            # Simulate wealth evolution (more sophisticated logic could be added)
-            # For now, simulate gradual growth with some variation
-            growth_factor = 1 - (days_back / total_days) * 0.15  # 15% growth over the period
-            variation = 0.02 * (i % 3 - 1)  # Add some variation
-            point_wealth = base_wealth * (growth_factor + variation)
+            if i == 0:
+                # For the first point, calculate historical wealth by subtracting future transactions
+                future_transactions = transactions.filter(date__gt=point_date.date())
+                transaction_sum = future_transactions.aggregate(Sum('amount'))['amount__sum'] or 0
+                point_wealth = running_wealth - transaction_sum
+            else:
+                # For subsequent points, add transactions that occurred since last point
+                prev_point_date = now - timedelta(days=total_days - ((i-1) * interval_days))
+                period_transactions = transactions.filter(
+                    date__gt=prev_point_date.date(),
+                    date__lte=point_date.date()
+                )
+                transaction_sum = period_transactions.aggregate(Sum('amount'))['amount__sum'] or 0
+                point_wealth = wealth_evolution[-1]['wealth'] + transaction_sum
             
             # Ensure wealth is always positive
-            point_wealth = max(0, point_wealth)
+            point_wealth = max(10000, point_wealth)  # Minimum 10k€
             
             wealth_evolution.append({
                 'month': point_date.strftime(date_format),
@@ -127,6 +144,13 @@ class TransactionViewSet(viewsets.ModelViewSet):
         current_expenses = current_month_transactions.filter(category__type='EXPENSE').aggregate(
             total=Sum('amount')
         )['total'] or 0
+        
+        # Debug: check what transactions are being included
+        debug_transactions = current_month_transactions.filter(category__type='EXPENSE').values_list('description', 'amount', 'date')
+        print(f"DEBUG - Current expenses transactions ({thirty_days_ago.date()} to {now.date()}):")
+        for desc, amount, date in debug_transactions:
+            print(f"  {date}: {desc} - {amount}€")
+        print(f"DEBUG - Total current expenses: {current_expenses}€ (abs: {abs(current_expenses)}€)")
         
         previous_income = previous_month_transactions.filter(category__type='INCOME').aggregate(
             total=Sum('amount')
@@ -211,54 +235,59 @@ class TransactionViewSet(viewsets.ModelViewSet):
         
         queryset = Transaction.objects.filter(user=user, date__gte=start_date)
         
-        # 1. Monthly income vs expenses
+        # 1. Monthly income vs expenses - Optimized with single query
+        from django.db.models import Case, When, Sum
+        from django.db.models.functions import TruncMonth
+        
+        monthly_stats = queryset.annotate(
+            month=TruncMonth('date')
+        ).values('month').annotate(
+            income=Sum(Case(When(category__type='INCOME', then='amount'), default=0)),
+            expenses=Sum(Case(When(category__type='EXPENSE', then='amount'), default=0))
+        ).order_by('month')
+        
         monthly_data = []
-        for i in range(period_months):
-            month_start = datetime(now.year, now.month, 1) - timedelta(days=i*30)
-            month_start = month_start.replace(day=1)
-            month_end = datetime(month_start.year, month_start.month, monthrange(month_start.year, month_start.month)[1])
-            
-            month_transactions = queryset.filter(date__gte=month_start, date__lte=month_end)
-            
-            income = month_transactions.filter(category__type='INCOME').aggregate(total=Sum('amount'))['total'] or 0
-            expenses = month_transactions.filter(category__type='EXPENSE').aggregate(total=Sum('amount'))['total'] or 0
-            
+        for stat in monthly_stats:
             monthly_data.append({
-                'month': month_start.strftime('%b'),
-                'income': float(income),
-                'expenses': float(abs(expenses))
+                'month': stat['month'].strftime('%b'),
+                'income': float(stat['income']),
+                'expenses': float(abs(stat['expenses']))
             })
         
-        monthly_data.reverse()  # Chronological order
+        # 2. Category trends - Optimized with single query
+        category_monthly_stats = queryset.filter(category__type='EXPENSE').annotate(
+            month=TruncMonth('date')
+        ).values('category__name', 'month').annotate(
+            total=Sum('amount')
+        ).order_by('category__name', 'month')
         
-        # 2. Category trends
-        category_trends = []
-        categories = queryset.filter(category__type='EXPENSE').values('category__name').distinct()
-        
-        for category in categories:
-            category_name = category['category__name']
-            monthly_amounts = []
+        # Group by category
+        category_data = {}
+        for stat in category_monthly_stats:
+            category_name = stat['category__name']
+            month = stat['month']
+            amount = float(abs(stat['total']))
             
-            for i in range(period_months):
-                month_start = datetime(now.year, now.month, 1) - timedelta(days=i*30)
-                month_start = month_start.replace(day=1)
-                month_end = datetime(month_start.year, month_start.month, monthrange(month_start.year, month_start.month)[1])
-                
-                amount = queryset.filter(
-                    category__name=category_name,
-                    date__gte=month_start,
-                    date__lte=month_end
-                ).aggregate(total=Sum('amount'))['total'] or 0
-                
-                monthly_amounts.append({
-                    'month': month_start.strftime('%b'),
-                    'amount': float(abs(amount))
+            if category_name not in category_data:
+                category_data[category_name] = {}
+            
+            category_data[category_name][month] = amount
+        
+        # Format for frontend
+        category_trends = []
+        for category_name, monthly_data in category_data.items():
+            data = []
+            for stat in monthly_stats:  # Use same months as income/expenses
+                month = stat['month']
+                amount = monthly_data.get(month, 0)
+                data.append({
+                    'month': month.strftime('%b'),
+                    'amount': amount
                 })
             
-            monthly_amounts.reverse()
             category_trends.append({
                 'category': category_name,
-                'data': monthly_amounts
+                'data': data
             })
         
         # 3. Financial insights
