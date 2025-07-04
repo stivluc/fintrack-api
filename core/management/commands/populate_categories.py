@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from core.models import Category, CategoryType
+from core.models import Category
 
 
 class Command(BaseCommand):
@@ -8,21 +8,22 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         default_categories = [
             # Income categories
-            {'name': 'Salaire', 'icon': '💼', 'color': '#10B981', 'type': CategoryType.INCOME},
-            {'name': 'Freelance', 'icon': '💻', 'color': '#059669', 'type': CategoryType.INCOME},
-            {'name': 'Investissements', 'icon': '📈', 'color': '#047857', 'type': CategoryType.INCOME},
-            {'name': 'Autres revenus', 'icon': '💰', 'color': '#065F46', 'type': CategoryType.INCOME},
+            {'name': 'Salaire', 'icon': '💼', 'color': '#10B981', 'type': 'INCOME'},
+            {'name': 'Prime', 'icon': '🎁', 'color': '#059669', 'type': 'INCOME'},
+            {'name': 'Freelance', 'icon': '💻', 'color': '#047857', 'type': 'INCOME'},
+            {'name': 'Investissements', 'icon': '📈', 'color': '#065F46', 'type': 'INCOME'},
+            {'name': 'Autres revenus', 'icon': '💰', 'color': '#10B981', 'type': 'INCOME'},
             
             # Expense categories
-            {'name': 'Alimentation', 'icon': '🍕', 'color': '#EF4444', 'type': CategoryType.EXPENSE},
-            {'name': 'Transport', 'icon': '🚗', 'color': '#F97316', 'type': CategoryType.EXPENSE},
-            {'name': 'Logement', 'icon': '🏠', 'color': '#8B5CF6', 'type': CategoryType.EXPENSE},
-            {'name': 'Santé', 'icon': '🏥', 'color': '#EC4899', 'type': CategoryType.EXPENSE},
-            {'name': 'Loisirs', 'icon': '🎬', 'color': '#3B82F6', 'type': CategoryType.EXPENSE},
-            {'name': 'Shopping', 'icon': '🛍️', 'color': '#F59E0B', 'type': CategoryType.EXPENSE},
-            {'name': 'Éducation', 'icon': '📚', 'color': '#6366F1', 'type': CategoryType.EXPENSE},
-            {'name': 'Services', 'icon': '⚡', 'color': '#84CC16', 'type': CategoryType.EXPENSE},
-            {'name': 'Autres dépenses', 'icon': '📦', 'color': '#6B7280', 'type': CategoryType.EXPENSE},
+            {'name': 'Alimentation', 'icon': '🍕', 'color': '#EF4444', 'type': 'EXPENSE'},
+            {'name': 'Transport', 'icon': '🚗', 'color': '#F97316', 'type': 'EXPENSE'},
+            {'name': 'Logement', 'icon': '🏠', 'color': '#8B5CF6', 'type': 'EXPENSE'},
+            {'name': 'Santé', 'icon': '🏥', 'color': '#EC4899', 'type': 'EXPENSE'},
+            {'name': 'Loisirs', 'icon': '🎬', 'color': '#3B82F6', 'type': 'EXPENSE'},
+            {'name': 'Shopping', 'icon': '🛍️', 'color': '#F59E0B', 'type': 'EXPENSE'},
+            {'name': 'Éducation', 'icon': '📚', 'color': '#6366F1', 'type': 'EXPENSE'},
+            {'name': 'Services', 'icon': '⚡', 'color': '#84CC16', 'type': 'EXPENSE'},
+            {'name': 'Autres dépenses', 'icon': '📦', 'color': '#6B7280', 'type': 'EXPENSE'},
         ]
 
         created_count = 0

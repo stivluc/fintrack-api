@@ -39,7 +39,19 @@ class TransactionViewSet(viewsets.ModelViewSet):
     ordering = ['-date', '-created_at']
     
     def get_queryset(self):
-        return Transaction.objects.filter(user=self.request.user)
+        queryset = Transaction.objects.filter(user=self.request.user)
+        
+        # Handle custom date filtering
+        date_gte = self.request.query_params.get('date_gte')
+        date_lte = self.request.query_params.get('date_lte')
+        
+        if date_gte:
+            queryset = queryset.filter(date__gte=date_gte)
+        
+        if date_lte:
+            queryset = queryset.filter(date__lte=date_lte)
+        
+        return queryset
     
     def _generate_wealth_evolution(self, user, current_wealth, period, now):
         """Generate wealth evolution data based on period"""
