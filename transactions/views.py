@@ -7,11 +7,12 @@ from django.db.models import Sum, Count, Avg, Max, Min
 from django.db.models.functions import TruncMonth, TruncDate
 from datetime import datetime, timedelta
 from calendar import monthrange
+import django_filters
 from .models import Transaction, Budget
 from .serializers import TransactionSerializer, BudgetSerializer
 
 
-class TransactionFilter(DjangoFilterBackend):
+class TransactionFilter(django_filters.FilterSet):
     class Meta:
         model = Transaction
         fields = {
@@ -27,7 +28,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
     serializer_class = TransactionSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['category', 'account', 'is_recurring']
+    filterset_class = TransactionFilter
     search_fields = ['description']
     ordering_fields = ['date', 'amount', 'created_at']
     ordering = ['-date', '-created_at']
