@@ -110,52 +110,31 @@ class Command(BaseCommand):
     def create_assets(self, user):
         assets_data = [
             {
-                'name': 'Résidence principale',
+                'name': 'Appartement Paris 11e',
                 'asset_type': 'REAL_ESTATE',
-                'purchase_price': Decimal('180000.00'),
-                'current_value': Decimal('200000.00'),
+                'purchase_price': Decimal('350000.00'),
+                'current_value': Decimal('380000.00'),
                 'is_active': True
             },
             {
                 'name': 'Peugeot 308',
-                'asset_type': 'OTHER',
+                'asset_type': 'VEHICLE',
                 'purchase_price': Decimal('25000.00'),
                 'current_value': Decimal('18000.00'),
                 'is_active': True
             },
             {
-                'name': 'Portefeuille Actions',
-                'asset_type': 'STOCKS',
-                'purchase_price': Decimal('45000.00'),
-                'current_value': Decimal('52000.00'),
-                'is_active': True
-            },
-            {
-                'name': 'ETF Monde',
-                'asset_type': 'STOCKS',
-                'purchase_price': Decimal('28000.00'),
-                'current_value': Decimal('31000.00'),
-                'is_active': True
-            },
-            {
-                'name': 'Obligations',
-                'asset_type': 'BONDS',
-                'purchase_price': Decimal('15000.00'),
-                'current_value': Decimal('15800.00'),
+                'name': 'Actions Tesla',
+                'asset_type': 'STOCK',
+                'purchase_price': Decimal('8000.00'),
+                'current_value': Decimal('12000.00'),
                 'is_active': True
             },
             {
                 'name': 'Or physique',
-                'asset_type': 'PRECIOUS_METALS',
-                'purchase_price': Decimal('8000.00'),
-                'current_value': Decimal('8500.00'),
-                'is_active': True
-            },
-            {
-                'name': 'Crypto (BTC/ETH)',
-                'asset_type': 'CRYPTO',
-                'purchase_price': Decimal('12000.00'),
-                'current_value': Decimal('10000.00'),
+                'asset_type': 'COMMODITY',
+                'purchase_price': Decimal('5000.00'),
+                'current_value': Decimal('5500.00'),
                 'is_active': True
             }
         ]
@@ -241,9 +220,9 @@ class Command(BaseCommand):
         life_events = self.generate_life_events()
         
         while current_date <= datetime.now():
-            # Monthly salary (around 28th of each month) - Reduced
+            # Monthly salary (around 28th of each month)
             if current_date.day == 28:
-                salary_amount = Decimal(str(random.uniform(2800, 3000)))
+                salary_amount = Decimal(str(random.uniform(3200, 3400)))
                 transactions.append(Transaction(
                     user=user,
                     account=checking,
@@ -254,48 +233,14 @@ class Command(BaseCommand):
                     is_recurring=True
                 ))
             
-            # Monthly rent (1st of each month) - Increased
+            # Monthly rent (1st of each month)
             if current_date.day == 1:
                 transactions.append(Transaction(
                     user=user,
                     account=checking,
                     category=categories['rent'],
-                    amount=Decimal('1400.00'),
+                    amount=Decimal('1250.00'),
                     description=f"Loyer {current_date.strftime('%B %Y')}",
-                    date=current_date,
-                    is_recurring=True
-                ))
-            
-            # Monthly fixed expenses
-            if current_date.day == 5:  # Utilities, insurance, etc.
-                transactions.append(Transaction(
-                    user=user,
-                    account=checking,
-                    category=categories['rent'],
-                    amount=Decimal(str(random.uniform(120, 180))),
-                    description="Électricité + Gaz",
-                    date=current_date,
-                    is_recurring=True
-                ))
-                
-            if current_date.day == 10:  # Internet, phone
-                transactions.append(Transaction(
-                    user=user,
-                    account=checking,
-                    category=categories['transport'],  # Services
-                    amount=Decimal(str(random.uniform(60, 90))),
-                    description="Internet + Mobile",
-                    date=current_date,
-                    is_recurring=True
-                ))
-                
-            if current_date.day == 15:  # Insurance
-                transactions.append(Transaction(
-                    user=user,
-                    account=checking,
-                    category=categories['health'],
-                    amount=Decimal(str(random.uniform(80, 120))),
-                    description="Assurances (auto, habitation)",
                     date=current_date,
                     is_recurring=True
                 ))
@@ -331,19 +276,19 @@ class Command(BaseCommand):
                     is_recurring=False
                 ))
             
-            # Daily random expenses (more realistic patterns) - Increased frequency
-            if random.random() < 0.9:  # 90% chance of daily expense
+            # Daily random expenses (more realistic patterns)
+            if random.random() < 0.7:  # 70% chance of daily expense
                 self.add_daily_expenses(transactions, user, accounts, categories, current_date)
             
-            # Reduced bonuses (only twice a year)
-            if current_date.month in [6, 12] and current_date.day == 15:
-                bonus_amount = Decimal(str(random.uniform(800, 1500)))
+            # Quarterly bonuses
+            if current_date.month in [3, 6, 9, 12] and current_date.day == 15:
+                bonus_amount = Decimal(str(random.uniform(1000, 2500)))
                 transactions.append(Transaction(
                     user=user,
                     account=checking,
                     category=categories['bonus'],
                     amount=bonus_amount,
-                    description=f"Prime semestrielle",
+                    description=f"Prime trimestrielle Q{(current_date.month-1)//3 + 1}",
                     date=current_date,
                     is_recurring=False
                 ))
@@ -419,13 +364,13 @@ class Command(BaseCommand):
         return events
 
     def add_daily_expenses(self, transactions, user, accounts, categories, date):
-        """Add realistic daily expenses - Increased amounts"""
+        """Add realistic daily expenses"""
         checking = accounts[0]
         
-        # Food expenses (more frequent and higher amounts)
-        if random.random() < 0.8:  # 80% chance
-            amount = Decimal(str(random.uniform(12, 65)))
-            shops = ['Monoprix', 'Carrefour', 'Boulangerie', 'Marché', 'Franprix', 'Uber Eats', 'Deliveroo']
+        # Food expenses (more frequent)
+        if random.random() < 0.6:  # 60% chance
+            amount = Decimal(str(random.uniform(8, 45)))
+            shops = ['Monoprix', 'Carrefour', 'Boulangerie', 'Marché', 'Franprix']
             transactions.append(Transaction(
                 user=user,
                 account=checking,
@@ -436,10 +381,10 @@ class Command(BaseCommand):
                 is_recurring=False
             ))
         
-        # Transport (metro, uber, essence) - Higher amounts
-        if random.random() < 0.4:  # 40% chance
-            amount = Decimal(str(random.uniform(5, 75)))
-            transports = ['Métro', 'Uber', 'Essence', 'Péage', 'Parking', 'Train']
+        # Transport (metro, uber, essence)
+        if random.random() < 0.3:  # 30% chance
+            amount = Decimal(str(random.uniform(2, 50)))
+            transports = ['Métro', 'Uber', 'Essence', 'Péage', 'Parking']
             transactions.append(Transaction(
                 user=user,
                 account=checking,
@@ -450,10 +395,10 @@ class Command(BaseCommand):
                 is_recurring=False
             ))
         
-        # Leisure (restaurants, cinema, etc.) - Higher amounts and frequency
-        if random.random() < 0.35:  # 35% chance
-            amount = Decimal(str(random.uniform(20, 120)))
-            activities = ['Restaurant', 'Cinéma', 'Bar', 'Concert', 'Théâtre', 'Livre', 'Shopping', 'Coiffeur']
+        # Leisure (restaurants, cinema, etc.)
+        if random.random() < 0.2:  # 20% chance
+            amount = Decimal(str(random.uniform(15, 80)))
+            activities = ['Restaurant', 'Cinéma', 'Bar', 'Concert', 'Théâtre', 'Livre']
             transactions.append(Transaction(
                 user=user,
                 account=checking,
