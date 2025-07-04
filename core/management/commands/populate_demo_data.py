@@ -10,10 +10,13 @@ import random
 User = get_user_model()
 
 
+from django.core.management import call_command
+
 class Command(BaseCommand):
     help = 'Populate database with demo data'
 
     def handle(self, *args, **options):
+        call_command('populate_categories')
         self.stdout.write(self.style.SUCCESS('Creating demo data...'))
         
         # 1. Créer les utilisateurs de démo
@@ -269,12 +272,11 @@ class Command(BaseCommand):
         
         # 6. Créer des budgets
         budgets_data = [
-            {'category': expense_categories[0], 'limit': 600.00},  # Alimentation
-            {'category': expense_categories[1], 'limit': 300.00},  # Transport
-            {'category': expense_categories[2], 'limit': 1500.00}, # Logement
-            {'category': expense_categories[4], 'limit': 250.00},  # Loisirs
-            {'category': expense_categories[5], 'limit': 200.00},  # Shopping
-            {'category': expense_categories[3], 'limit': 150.00},   # Santé
+            {'category': expense_categories[0], 'limit': 500.00},  # Alimentation
+            {'category': expense_categories[1], 'limit': 250.00},  # Transport
+            {'category': expense_categories[4], 'limit': 200.00},  # Loisirs
+            {'category': expense_categories[5], 'limit': 150.00},  # Shopping
+            {'category': expense_categories[3], 'limit': 100.00},   # Santé
         ]
         
         budgets_created = 0
