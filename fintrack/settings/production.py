@@ -36,11 +36,19 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 # Static files handling with whitenoise
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# CORS for production (ajuster selon votre frontend)
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "https://your-frontend-domain.com",
-]
+# CORS configuration
+cors_allowed_origins_str = os.environ.get('CORS_ALLOWED_ORIGINS', '')
+if cors_allowed_origins_str:
+    CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_allowed_origins_str.split(',')]
+else:
+    CORS_ALLOWED_ORIGINS = []
+
+# It's also common to allow all origins in development but be specific in production.
+# Example:
+# if DEBUG:
+#     CORS_ALLOW_ALL_ORIGINS = True
+# else:
+#     CORS_ALLOWED_ORIGINS = [origin.strip() for origin in os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',') if origin.strip()]
 
 LOGGING = {
     'version': 1,
