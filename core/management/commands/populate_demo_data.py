@@ -175,6 +175,7 @@ class Command(BaseCommand):
             (date(2025, 6, 25), 'Salaire mensuel', 4200.00, salaire_cat),
             (date(2025, 6, 15), 'Projet freelance', 1200.00, freelance_cat),
             (date(2025, 6, 10), 'Remboursement frais', 250.00, autres_revenus_cat),
+            (date(2025, 7, 1), 'Salaire juillet', 4200.00, salaire_cat),
             
             # LOGEMENT
             (date(2025, 6, 1), 'Loyer juin', -1300.00, expense_categories[2]),
@@ -192,6 +193,9 @@ class Command(BaseCommand):
             (date(2025, 6, 27), 'Courses weekend', -83.20, expense_categories[0]),
             (date(2025, 6, 30), 'Café bureau', -12.60, expense_categories[0]),
             (date(2025, 7, 2), 'Courses juillet', -46.00, expense_categories[0]),
+            (date(2025, 7, 5), 'Supermarché Monoprix', -89.30, expense_categories[0]),
+            (date(2025, 7, 7), 'Restaurant midi', -28.50, expense_categories[0]),
+            (date(2025, 7, 8), 'Boulangerie matin', -8.20, expense_categories[0]),
             
             # TRANSPORT (pour atteindre 320.85€ total)
             (date(2025, 6, 3), 'Essence BP', -62.30, expense_categories[1]),
@@ -202,6 +206,10 @@ class Command(BaseCommand):
             (date(2025, 6, 14), 'Abonnement transports', -85.00, expense_categories[1]),
             (date(2025, 6, 29), 'Réparation véhicule', -45.45, expense_categories[1]),
             (date(2025, 7, 5), 'Parking aéroport', -16.00, expense_categories[1]),
+            (date(2025, 7, 1), 'Loyer juillet', -1300.00, expense_categories[2]),
+            (date(2025, 7, 3), 'Essence Total', -68.40, expense_categories[1]),
+            (date(2025, 7, 6), 'Péage week-end', -22.80, expense_categories[1]),
+            (date(2025, 7, 8), 'Parking centre commercial', -8.50, expense_categories[1]),
             
             # LOISIRS (pour atteindre 245.60€ total)
             (date(2025, 6, 7), 'Cinéma', -25.00, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
@@ -213,18 +221,25 @@ class Command(BaseCommand):
             (date(2025, 7, 4), 'Exposition musée', -18.00, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
             (date(2025, 7, 6), 'Abonnement Spotify', -9.99, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
             (date(2025, 6, 10), 'Magazine BD', -23.83, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
+            (date(2025, 7, 4), 'Sortie bar', -35.60, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
+            (date(2025, 7, 7), 'Livre technique', -24.90, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
+            (date(2025, 7, 8), 'Jeu vidéo', -45.00, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
             
             # SANTÉ (pour atteindre 89.00€ total)
             (date(2025, 6, 8), 'Pharmacie', -22.60, expense_categories[3]),
             (date(2025, 6, 19), 'Médecin généraliste', -30.00, expense_categories[3]),
             (date(2025, 6, 25), 'Dentiste contrôle', -25.00, expense_categories[3]),
             (date(2025, 7, 3), 'Compléments vitamines', -11.40, expense_categories[3]),
+            (date(2025, 7, 5), 'Opticien lunettes', -89.00, expense_categories[3]),
+            (date(2025, 7, 8), 'Pharmacie médicaments', -18.50, expense_categories[3]),
             
             # SHOPPING (pour atteindre 156.75€ total)
             (date(2025, 6, 4), 'Vêtements Zara', -65.00, expense_categories[5] if len(expense_categories) > 5 else expense_categories[-1]),
             (date(2025, 6, 17), 'Accessoires téléphone', -29.99, expense_categories[5] if len(expense_categories) > 5 else expense_categories[-1]),
             (date(2025, 6, 26), 'Chaussures', -45.76, expense_categories[5] if len(expense_categories) > 5 else expense_categories[-1]),
             (date(2025, 7, 3), 'Petits accessoires', -16.00, expense_categories[5] if len(expense_categories) > 5 else expense_categories[-1]),
+            (date(2025, 7, 6), 'Pull H&M', -39.99, expense_categories[5] if len(expense_categories) > 5 else expense_categories[-1]),
+            (date(2025, 7, 8), 'Cosmétiques Sephora', -52.30, expense_categories[5] if len(expense_categories) > 5 else expense_categories[-1]),
             
             # ÉDUCATION (pour atteindre 45.00€ total si la catégorie existe)
             (date(2025, 6, 12), 'Livre technique Python', -25.90, education_cat if education_cat else expense_categories[-1]),
