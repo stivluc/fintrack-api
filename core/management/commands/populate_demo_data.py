@@ -163,6 +163,13 @@ class Command(BaseCommand):
         if not autres_revenus_cat and income_categories:
             autres_revenus_cat = income_categories[-1]
         
+        # Rechercher la catégorie éducation pour les transactions
+        education_cat = None
+        for cat in expense_categories:
+            if 'ducation' in cat.name or 'formation' in cat.name.lower() or 'livre' in cat.name.lower():
+                education_cat = cat
+                break
+        
         recent_transactions = [
             # REVENUS
             (date(2025, 6, 25), 'Salaire mensuel', 4200.00, salaire_cat),
@@ -174,7 +181,7 @@ class Command(BaseCommand):
             (date(2025, 6, 5), 'Facture électricité', -75.50, expense_categories[2]),
             (date(2025, 6, 12), 'Abonnement internet', -39.99, expense_categories[2]),
             
-            # ALIMENTATION
+            # ALIMENTATION (pour atteindre 487.30€ total)
             (date(2025, 6, 2), 'Courses Carrefour', -85.30, expense_categories[0]),
             (date(2025, 6, 6), 'Boulangerie', -15.40, expense_categories[0]),
             (date(2025, 6, 9), 'Supermarché Leclerc', -95.60, expense_categories[0]),
@@ -184,29 +191,44 @@ class Command(BaseCommand):
             (date(2025, 6, 23), 'Pizza livraison', -28.50, expense_categories[0]),
             (date(2025, 6, 27), 'Courses weekend', -83.20, expense_categories[0]),
             (date(2025, 6, 30), 'Café bureau', -12.60, expense_categories[0]),
-            (date(2025, 7, 2), 'Courses juillet', -55.80, expense_categories[0]),
+            (date(2025, 7, 2), 'Courses juillet', -46.00, expense_categories[0]),
             
-            # TRANSPORT
+            # TRANSPORT (pour atteindre 320.85€ total)
             (date(2025, 6, 3), 'Essence BP', -62.30, expense_categories[1]),
             (date(2025, 6, 11), 'Péage autoroute', -25.40, expense_categories[1]),
             (date(2025, 6, 18), 'Parking centre-ville', -12.00, expense_categories[1]),
             (date(2025, 6, 24), 'Essence Total', -59.70, expense_categories[1]),
             (date(2025, 7, 1), 'Lavage auto', -15.00, expense_categories[1]),
+            (date(2025, 6, 14), 'Abonnement transports', -85.00, expense_categories[1]),
+            (date(2025, 6, 29), 'Réparation véhicule', -45.45, expense_categories[1]),
+            (date(2025, 7, 5), 'Parking aéroport', -16.00, expense_categories[1]),
             
-            # LOISIRS
+            # LOISIRS (pour atteindre 245.60€ total)
             (date(2025, 6, 7), 'Cinéma', -25.00, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
             (date(2025, 6, 14), 'Livre Amazon', -19.99, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
             (date(2025, 6, 21), 'Concert', -55.00, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
             (date(2025, 6, 28), 'Abonnement Netflix', -15.49, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
+            (date(2025, 6, 15), 'Jeux vidéo Steam', -35.50, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
+            (date(2025, 6, 22), 'Sortie entre amis', -42.80, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
+            (date(2025, 7, 4), 'Exposition musée', -18.00, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
+            (date(2025, 7, 6), 'Abonnement Spotify', -9.99, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
+            (date(2025, 6, 10), 'Magazine BD', -23.83, expense_categories[4] if len(expense_categories) > 4 else expense_categories[-1]),
             
-            # SANTÉ
+            # SANTÉ (pour atteindre 89.00€ total)
             (date(2025, 6, 8), 'Pharmacie', -22.60, expense_categories[3]),
             (date(2025, 6, 19), 'Médecin généraliste', -30.00, expense_categories[3]),
+            (date(2025, 6, 25), 'Dentiste contrôle', -25.00, expense_categories[3]),
+            (date(2025, 7, 3), 'Compléments vitamines', -11.40, expense_categories[3]),
             
-            # SHOPPING
-            (date(2025, 6, 4), 'Vêtements Zara', -99.90, expense_categories[5] if len(expense_categories) > 5 else expense_categories[-1]),
+            # SHOPPING (pour atteindre 156.75€ total)
+            (date(2025, 6, 4), 'Vêtements Zara', -65.00, expense_categories[5] if len(expense_categories) > 5 else expense_categories[-1]),
             (date(2025, 6, 17), 'Accessoires téléphone', -29.99, expense_categories[5] if len(expense_categories) > 5 else expense_categories[-1]),
-            (date(2025, 6, 26), 'Chaussures', -85.00, expense_categories[5] if len(expense_categories) > 5 else expense_categories[-1]),
+            (date(2025, 6, 26), 'Chaussures', -45.76, expense_categories[5] if len(expense_categories) > 5 else expense_categories[-1]),
+            (date(2025, 7, 3), 'Petits accessoires', -16.00, expense_categories[5] if len(expense_categories) > 5 else expense_categories[-1]),
+            
+            # ÉDUCATION (pour atteindre 45.00€ total si la catégorie existe)
+            (date(2025, 6, 12), 'Livre technique Python', -25.90, education_cat if education_cat else expense_categories[-1]),
+            (date(2025, 6, 20), 'Formation en ligne Udemy', -19.10, education_cat if education_cat else expense_categories[-1]),
             
             # ÉPARGNE/INVESTISSEMENT
             (date(2025, 6, 26), 'Virement épargne', -600.00, expense_categories[-1]),
@@ -286,14 +308,18 @@ class Command(BaseCommand):
         
         self.stdout.write(self.style.SUCCESS(f'✓ {transactions_created} transactions created'))
         
-        # 6. Créer des budgets
+        # 6. Créer des budgets (données identiques à l'app mobile)
         budgets_data = [
-            {'category': expense_categories[0], 'limit': 500.00},  # Alimentation
-            {'category': expense_categories[1], 'limit': 250.00},  # Transport
-            {'category': expense_categories[4], 'limit': 200.00},  # Loisirs
-            {'category': expense_categories[5], 'limit': 150.00},  # Shopping
-            {'category': expense_categories[3], 'limit': 100.00},   # Santé
+            {'category': expense_categories[0], 'limit': 600.00},  # Alimentation
+            {'category': expense_categories[1], 'limit': 400.00},  # Transport
+            {'category': expense_categories[4], 'limit': 300.00},  # Loisirs
+            {'category': expense_categories[5], 'limit': 200.00},  # Shopping
+            {'category': expense_categories[3], 'limit': 150.00},   # Santé
         ]
+        
+        # Ajouter un budget pour Éducation si la catégorie existe
+        if education_cat:
+            budgets_data.append({'category': education_cat, 'limit': 100.00})  # Éducation
         
         budgets_created = 0
         for budget_data in budgets_data:
